@@ -4,7 +4,7 @@ use std::io::stdin;
 use std::env;
 use std::process::exit;
 
-static WCWIDTH_ENABLED: bool = cfg!(feature="unicode-width");
+const WCWIDTH_ENABLED: bool = cfg!(feature="unicode-width");
 
 fn get_settings_from_args() -> Settings<'static> {
     let mut ret = Settings::default();
