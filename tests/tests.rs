@@ -18,6 +18,28 @@ intentional.";
 }
 
 #[test]
+fn justify_with_newlines() {
+    let settings = Settings { wcwidth: true, .. Settings::default() };
+
+    let plain = "Rust is an iron oxide, a usually red oxide formed by the redox reaction of iron and oxygen in the presence of water or air moisture. Several forms of rust are distinguishable both visually and by spectroscopy, and form under different circumstances. Rust consists of hydrated iron(III) oxides Fe2O3·nH2O and iron(III) oxide-hydroxide (FeO(OH), Fe(OH)3).
+
+Given sufficient time, oxygen, and water, any iron mass will eventually convert entirely to rust and disintegrate. Surface rust is flaky and friable, and it provides no protection to the underlying iron, unlike the formation of patina on copper surfaces. Rusting is the common term for corrosion of iron and its alloys, such as steel. Many other metals undergo similar corrosion, but the resulting oxides are not commonly called rust.";
+    let justified = "Rust  is an iron oxide, a usually red oxide formed by the redox reaction of iron
+and  oxygen in the presence of water or air moisture. Several forms of rust  are
+distinguishable  both  visually  and by spectroscopy, and form  under  different
+circumstances.  Rust  consists  of  hydrated  iron(III)  oxides  Fe2O3·nH2O  and
+iron(III) oxide-hydroxide (FeO(OH), Fe(OH)3).
+
+Given  sufficient time, oxygen, and water, any iron mass will eventually convert
+entirely  to  rust and disintegrate. Surface rust is flaky and friable,  and  it
+provides no protection to the underlying iron, unlike the formation of patina on
+copper  surfaces.  Rusting  is  the common term for corrosion of  iron  and  its
+alloys,  such  as  steel. Many other metals undergo similar corrosion,  but  the
+resulting oxides are not commonly called rust.";
+    assert_eq!(justify(plain, &settings), justified);
+}
+
+#[test]
 fn word_longer_than_width_hyphenate() {
     let settings = Settings { width: 10, hyphenate_overflow: true, ..Settings::default() };
     let plain = "123456 789 1234567890 123456789012 123 456 89";
@@ -82,7 +104,7 @@ fn one_line_justify() {
 #[test]
 fn many_empty_lines_justify() {
     let settings = Settings { width: 9, ..Settings::default() };
-    assert_eq!(justify("\n\n\n\n\n\n\nQuestions are  good\n\n\n      \n\n\n", &settings), "Questions\nare good");
+    assert_eq!(justify("\n\n\n\n\n\n\nQuestions are  good\n\n\n\n\n\n", &settings), "Questions\nare good");
 }
 
 #[cfg(feature="unicode-width")]

@@ -98,7 +98,9 @@ pub struct Settings<'a> {
     /// want "\r\n" instead.
     pub newline: &'a str,
     /// The hyphen that should be used if `hyphenate_overflow` is true
-    pub hyphen: &'a str
+    pub hyphen: &'a str,
+    /// The separator between paragraphs when `justify` is called
+    pub separator: &'a str
 }
 
 impl<'a> Default for Settings<'a> {
@@ -112,7 +114,8 @@ impl<'a> Default for Settings<'a> {
             wcwidth: false,
             ignore_spaces: false,
             newline: "\n",
-            hyphen: "-"
+            hyphen: "-",
+            separator: "\n\n"
         }
     }
 }
@@ -427,7 +430,6 @@ pub fn justify_paragraph(text: &str, settings: &Settings) -> String {
 
 /// Justify `text` according to the parameters in `settings`.
 pub fn justify(text: &str, settings: &Settings) -> String {
-    let mut ret = String::with_capacity(text.len() + (text.len() / 3));
     let mut h = String::new();
     if settings.hyphenate_overflow {
         h = hyphenate_overflow(text, &settings);
@@ -437,16 +439,14 @@ pub fn justify(text: &str, settings: &Settings) -> String {
         return h;
     }
 
-    let paragraphs: Vec<&str> = if settings.hyphenate_overflow { h.as_str() } else { text }
+    if settings.hyphenate_overflow { h.as_str() } else { text }
         .split(settings.newline)
         .filter(
             |e|e.len()!=0
             )
-        .collect();
-
-    for paragraph in paragraphs {
-        ret += &justify_paragraph(paragraph, settings);
-    }
-
-    ret
+        .map(
+            |p| justify_paragraph(p, settings)
+            )
+        .collect::<Vec<_>>()
+        .join(settings.separator)
 }
