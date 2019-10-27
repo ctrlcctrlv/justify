@@ -28,7 +28,7 @@
 //! the  adjective  go ("high, lofty") with the name of a local Yemaek tribe,  whose
 //! original  name  is  thought to have been either *Guru  (溝樓,  "walled  city,"
 //! inferred   from  some  toponyms  in  Chinese  historical  documents)  or  *Gauri
-//! (가우리, "center"). 
+//! (가우리, "center").
 //! ```
 //!
 //! With `unicode-width` and `wcwidth: true` in `Settings` struct:
@@ -46,7 +46,7 @@
 //! the  adjective  go ("high, lofty") with the name of a local Yemaek tribe,  whose
 //! original  name  is  thought  to have been either  *Guru  (溝樓,  "walled  city,"
 //! inferred  from some toponyms in Chinese historical documents) or *Gauri (가우리,
-//! "center").  
+//! "center").
 //! ```
 //!
 //! Notice  that  the  justification is better with `unicode-width`, but  there  are
@@ -56,7 +56,8 @@
 //! characters  on  a line to be justified. Also, depending on your browser, it  may
 //! not look right, try pasting it into a terminal emulator.
 
-#[cfg(feature="unicode-width")] extern crate wcwidth;
+#[cfg(feature="unicode-width")] extern crate unicode_width;
+#[cfg(feature="unicode-width")] use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 /// Where to insert spaces (use with `Settings`)
 pub enum InsertAt<'a> {
@@ -105,8 +106,8 @@ pub struct Settings<'a> {
 
 impl<'a> Default for Settings<'a> {
     fn default() -> Self {
-        Settings { 
-            justify_last_line: false, 
+        Settings {
+            justify_last_line: false,
             width: 80,
             hyphenate_overflow: false,
             insert_at: InsertAt::Balanced,
@@ -131,7 +132,7 @@ fn get_break_indexes(words: &Vec<&str>, settings: &Settings) -> Vec<usize> {
         let mut c;
         #[cfg(feature="unicode-width")] {
         if settings.wcwidth {
-            c = n + wcwidth::str_width(word).unwrap_or(0);
+            c = n + word.width();
         } else {
             c = n + word.len();
         }
@@ -182,7 +183,7 @@ fn spaces_to_add(lines: &Vec<Vec<&str>>, settings: &Settings) -> Vec<usize> {
         let mut size = line.iter().fold(0, |acc, &x| acc + x.len());
         #[cfg(feature="unicode-width")]
         match settings.wcwidth {
-            true => {size = line.iter().fold(0, |acc, &x| acc + wcwidth::str_width(x).unwrap_or(0))},
+            true => {size = line.iter().fold(0, |acc, &x| acc + x.width())},
             false => {}
         }
 
@@ -245,7 +246,7 @@ fn add_spaces(add: usize, line: &Vec<&str>, insert_at: &InsertAt) -> String {
     line.iter()
         .enumerate()
         .fold(
-            String::with_capacity(space_l + line_l), 
+            String::with_capacity(space_l + line_l),
             |acc, (i, x)| {
                 if i < line.len()-1 {
                     acc + x + &space_s[i]
@@ -302,17 +303,17 @@ fn hyphenate_overflow(text: &str, settings: &Settings) -> String {
             let h = s.chars()
                 .collect::<Vec<_>>();
 
-            let widths: Vec<u8> = h.iter()
-                .map(|e| wcwidth::char_width(*e).unwrap_or(0))
+            let widths: Vec<usize> = h.iter()
+                .map(|e| e.width().unwrap_or(0))
                 .collect();
 
             let mut q = 0;
             let mut hq = vec![0];
-            for (i, w) in widths.iter().enumerate() {
+            for (i, w) in widths.into_iter().enumerate() {
                 q += w;
-                if q as usize > settings.width-(settings.hyphen.len()) {
+                if q > settings.width-(settings.hyphen.len()) {
                     hq.push(i);
-                    q=*w;
+                    q=w;
                 }
             }
 
@@ -368,7 +369,7 @@ fn hyphenate_overflow(text: &str, settings: &Settings) -> String {
     for (i, s) in sws.iter().enumerate() {
         if s.len() > settings.width {
             let h = s.chars().collect::<Vec<_>>();
-            
+
             let mut f: Vec<String> = Vec::new();
             let mut p = h.chunks(settings.width-(settings.hyphen.len())).peekable();
 
@@ -434,7 +435,7 @@ pub fn justify(text: &str, settings: &Settings) -> String {
     if settings.hyphenate_overflow {
         h = hyphenate_overflow(text, &settings);
     }
-    
+
     if settings.ignore_spaces {
         return h;
     }

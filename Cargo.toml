@@ -10,10 +10,9 @@ homepage = "https://github.com/ctrlcctrlv/justify"
 
 [features]
 default = []
-unicode-width = ["wcwidth"]
 
 [dependencies]
-wcwidth = { version = "1.0.1", optional = true }
+unicode-width = { version = "0.1", optional = true }
 
 [profile.release]
 lto = true

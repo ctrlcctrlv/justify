@@ -18,6 +18,7 @@ intentional.";
 }
 
 #[test]
+#[cfg(feature="unicode-width")]
 fn justify_with_newlines() {
     let settings = Settings { wcwidth: true, .. Settings::default() };
 
