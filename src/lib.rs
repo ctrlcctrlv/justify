@@ -75,7 +75,7 @@ pub enum InsertAt<'a> {
     /// This  could  be used, for example, to implement insertion of  spaces  at
     /// random  points. If using this, you may not need every argument, but they
     /// are provided anyway for maximum extensibility.
-    Custom(&'a Fn(usize, usize, usize, &Vec<&str>)->usize)
+    Custom(&'a dyn Fn(usize, usize, usize, &Vec<&str>)->usize)
 }
 
 /// Settings used by `justify` and `justify_paragraph`
